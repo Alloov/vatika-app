@@ -1018,6 +1018,13 @@ function refreshMapLayers() {
   });
 
   document.getElementById('mapCount').textContent = lands.length;
+
+  // Auto-fit map to show all parcels
+  const allLayers = Object.values(mapLayers);
+  if (allLayers.length > 0) {
+    const group = L.featureGroup(allLayers);
+    map.fitBounds(group.getBounds().pad(0.3));
+  }
 }
 
 function vouchFromMap(landId) {
@@ -1397,11 +1404,22 @@ function renderMyLands() {
       ${land.email ? `<div class="mylands-row"><span class="mylands-key">Email</span><span class="mylands-val" style="font-family:var(--font-body)">${land.email}</span></div>` : ''}
       ${land.phone ? `<div class="mylands-row"><span class="mylands-key">Phone</span><span class="mylands-val" style="font-family:var(--font-body)">${land.phone}</span></div>` : ''}
       <div class="mylands-actions">
-        <button class="mylands-btn mylands-btn-view" onclick="showPage('map')">🗺 View on Map</button>
+        <button class="mylands-btn mylands-btn-view" onclick="viewLandOnMap('${land.id}')">🗺 View on Map</button>
         <button class="mylands-btn mylands-btn-transfer" onclick="prefillTransfer(${land.id})">→ Transfer</button>
       </div>
     </div>`;
   }).join('');
+}
+
+function viewLandOnMap(landId) {
+  showPage('map');
+  setTimeout(() => {
+    const layer = mapLayers[landId];
+    if (layer) {
+      map.fitBounds(layer.getBounds().pad(0.5));
+      layer.openPopup();
+    }
+  }, 300);
 }
 
 function prefillTransfer(landId) {
